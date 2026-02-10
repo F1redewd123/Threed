@@ -11,8 +11,8 @@ export default class RenderBuffer {
 
   render() {
     for (var i = 0; i < this.inds.length; i += 3) {
-      for (var x = 0; x < this.scene.width; x++) {
-        for (var y = 0; y < this.scene.height; y++) {
+      for (var x = 0; x < this.scene.canvas.width; x++) {
+        for (var y = 0; y < this.scene.canvas.height; y++) {
           if (this.#isInside(
             new Vector2(this.verts[this.inds[i]].x, this.verts[this.inds[i]].y),
             new Vector2(this.verts[this.inds[i + 1]].x, this.verts[this.inds[i + 1]].y),
