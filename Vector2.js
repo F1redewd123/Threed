@@ -47,4 +47,11 @@ export default class Vector2 {
     this.x = Math.pow(this.x, x);
     this.y = Math.pow(this.y, x);
   }
+
+  rotate(x) {
+    var u = this.x;
+    var v = this.y;
+    this.x = (u * Math.cos(x) - v * Math.sin(x));
+    this.y = (u * Math.sin(x) + v * Math.cos(x));
+  }
 }
