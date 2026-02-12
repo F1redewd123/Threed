@@ -26,7 +26,7 @@ export default class RenderBuffer {
       var props = this.#shaderProperties;
       props["aPos"] = this.verts[v];
       props["position"] = Vector3.ZERO;
-      newVerts.push(this.shader.program.vert(props).position);
+      newVerts.push(this.shader.program.vert({ aPos: this.verts[v], position: Vector3.ZERO }).position);
     }
     for (var i = 0; i < this.inds.length; i += 3) {
       for (var x = Math.min(
