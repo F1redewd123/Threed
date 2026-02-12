@@ -1,3 +1,5 @@
+import Vector3 from "https://f1redewd123.github.io/Threed/Vector3.js";
+
 export default class Vector4 {
   constructor(x, y, z, w) {
     [this.x, this.y, this.z, this.w] = [x, y, z, w];
