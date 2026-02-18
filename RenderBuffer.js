@@ -77,11 +77,11 @@ export default class RenderBuffer {
             
             var res = this.shader.program.frag({
               ...this.#shaderProperties,
-              fragColor: Vector4.ZERO,
               uv: new Vector2(
-                w0 * this.uvs[i].x + w1 * this.uvs[i + 1].x + w2 * this.uvs[i + 2].x,
-                w0 * this.uvs[i].y + w1 * this.uvs[i + 1].y + w2 * this.uvs[i + 2].y
-              )
+                w0 * this.uvs[this.inds[i]].x + w1 * this.uvs[this.inds[i + 1]].x + w2 * this.uvs[this.inds[i + 2]].x,
+                w0 * this.uvs[this.inds[i]].y + w1 * this.uvs[this.inds[i + 1]].y + w2 * this.uvs[this.inds[i + 2]].y
+              ),
+              fragColor: Vector4.ZERO
             }).fragColor;
             data.push(...[res.x, res.y, res.z, res.w]);
           }
