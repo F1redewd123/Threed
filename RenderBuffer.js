@@ -22,14 +22,6 @@ export default class RenderBuffer {
   }
 
   render() {
-    const { ctx } = this.scene;
-    const width = ctx.canvas.width;
-    const height = ctx.canvas.height;
-    
-    // 1. Initialize a proper pixel buffer
-    const imgData = ctx.createImageData(width, height);
-    const data = imgData.data;
-
     /* VERTEX PARSING */
     var newVerts = [];
     for (var v = 0; v < this.verts.length; v++) {
@@ -37,59 +29,67 @@ export default class RenderBuffer {
     }
 
     /* FRAGMENT PARSING */
+    var data = new Array((maxX - minX) * (maxY - minY));
     for (var i = 0; i < this.inds.length; i += 3) {
-      const v0 = newVerts[this.inds[i]];
-      const v1 = newVerts[this.inds[i + 1]];
-      const v2 = newVerts[this.inds[i + 2]];
-
-      const uv0 = this.uvs[this.inds[i]];
-      const uv1 = this.uvs[this.inds[i + 1]];
-      const uv2 = this.uvs[this.inds[i + 2]];
-
-      // Bounding box
-      const minX = Math.max(0, Math.floor(Math.min(v0.x, v1.x, v2.x)));
-      const maxX = Math.min(width, Math.ceil(Math.max(v0.x, v1.x, v2.x)));
-      const minY = Math.max(0, Math.floor(Math.min(v0.y, v1.y, v2.y)));
-      const maxY = Math.min(height, Math.ceil(Math.max(v0.y, v1.y, v2.y)));
-
-      // Pre-calculate the area of the triangle (the denominator)
-      // Using your #isInside logic: area is the edge function of v2 relative to edge v0-v1
-      const area = this.#isInside(v0, v1, v2);
-
-      for (var y = minY; y < maxY; y++) {
-        for (var x = minX; x < maxX; x++) {
-          const p = new Vector2(x, y);
-          
-          // Edge functions
-          const w2 = this.#isInside(v0, v1, p) / area;
-          const w0 = this.#isInside(v1, v2, p) / area;
-          const w1 = this.#isInside(v2, v0, p) / area;
-
-          // If weights are positive, point is inside
-          if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-            const interpolatedUV = new Vector2(
-              w0 * uv0.x + w1 * uv1.x + w2 * uv2.x,
-              w0 * uv0.y + w1 * uv1.y + w2 * uv2.y
-            );
-
-            const res = this.shader.program.frag({
+      var minX = Math.min(
+        newVerts[this.inds[i]].x,
+        newVerts[this.inds[i + 1]].x,
+        newVerts[this.inds[i + 2]].x
+      );
+      var maxX = Math.max(
+        newVerts[this.inds[i]].x,
+        newVerts[this.inds[i + 1]].x,
+        newVerts[this.inds[i + 2]].x
+      );
+      var minY = Math.min(
+        newVerts[this.inds[i]].y,
+        newVerts[this.inds[i + 1]].y,
+        newVerts[this.inds[i + 2]].y
+      );
+      var maxY = Math.max(
+        newVerts[this.inds[i]].y,
+        newVerts[this.inds[i + 1]].y,
+        newVerts[this.inds[i + 2]].y
+      );
+      for (var x = minX; x < maxX; x++) {
+        for (var y = minY; y < maxY; y++) {
+          var l0 = this.#isInside(
+            new Vector2(newVerts[this.inds[i]].x, newVerts[this.inds[i]].y),
+            new Vector2(newVerts[this.inds[i + 1]].x, newVerts[this.inds[i + 1]].y),
+            new Vector2(x, y)
+          );
+          var l1 = this.#isInside(
+            new Vector2(newVerts[this.inds[i + 1]].x, newVerts[this.inds[i + 1]].y),
+            new Vector2(newVerts[this.inds[i + 2]].x, newVerts[this.inds[i + 2]].y),
+            new Vector2(x, y)
+          );
+          var l2 = this.#isInside(
+            new Vector2(newVerts[this.inds[i + 2]].x, newVerts[this.inds[i + 2]].y),
+            new Vector2(newVerts[this.inds[i]].x, newVerts[this.inds[i]].y),
+            new Vector2(x, y)
+          );
+          if (l0 <= 0 && l1 <= 0 && l2 <= 0) {
+            var d = (p1.y - p2.y) * (p0.x - p2.x) + (p2.x - p1.x) * (p0.y - p2.y);
+            
+            var w0 = ((p1.y - p2.y) * (p.x - p2.x) + (p2.x - p1.x) * (p.y - p2.y)) / d;
+            var w1 = ((p2.y - p0.y) * (p.x - p2.x) + (p0.x - p2.x) * (p.y - p2.y)) / d;
+            var w2 = 1 - w0 - w1;
+            
+            var res = this.shader.program.frag({
               ...this.#shaderProperties,
               fragColor: Vector4.ZERO,
-              uv: interpolatedUV
+              uv: new Vector2(
+                w0 * this.uvs[i].x + w1 * this.uvs[i + 1].x + w2 * this.uvs[i + 2].x,
+                w0 * this.uvs[i].y + w1 * this.uvs[i + 1].y + w2 * this.uvs[i + 2].y
+              )
             }).fragColor;
-
-            // Map x, y to the 1D data array (RGBA)
-            const pixelIdx = (y * width + x) * 4;
-            data[pixelIdx] = res.x * 255;     // R
-            data[pixelIdx + 1] = res.y * 255; // G
-            data[pixelIdx + 2] = res.z * 255; // B
-            data[pixelIdx + 3] = res.w * 255; // A
+            data.push(...[res.x, res.y, res.z, res.w]);
           }
         }
       }
     }
 
-    ctx.putImageData(imgData, 0, 0);
+    this.scene.ctx.putImageData(new ImageData(data, maxX - minX, maxY - minY), minX, minY);
   }
 
   #getVec2LerpValues(x, y) {
