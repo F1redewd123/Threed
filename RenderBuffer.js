@@ -86,7 +86,8 @@ export default class RenderBuffer {
               ),
               fragColor: Vector4.ZERO
             }).fragColor;
-            scene.ctx.fillStyle = `rgba(${res.x}, ${res.y}, ${res.z}, ${res.w})`;
+            this.scene.ctx.fillStyle = `rgba(${res.x}, ${res.y}, ${res.z}, ${res.w})`;
+            this.scene.ctx.fillRect(x, y, 1, 1);
           }
         }
       }
