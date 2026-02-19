@@ -29,13 +29,13 @@ export default class Texture {
     canvas.width = img.naturalWidth;
     canvas.height = img.naturalHeight;
     var ctx = canvas.getContext("2d");
-    ctx.drawImage(img);
+    ctx.drawImage(img, 0, 0);
     return ctx.getImageData(0, 0, img.naturalWidth, img.naturalHeight).data;
   }
 
   samplePos(p) {
     if (p.x > 1 || p.x < 0 || p.y > 1 || p.y < 0)
       return -1;
-    return this.#dataBuffer[p.x * (this.width - 1) + p.y * (this.height - 1) * this.width];
+    return this.#dataBuffer[p.x * Math.floor(this.width - 1) + p.y * Math.floor(this.height - 1) * this.width];
   }
 }
