@@ -6,18 +6,20 @@ export default class Texture {
   #dataBuffer = [];
   
   static fromURL(url) {
-    return new Promise(function(r, e) {
+    return new Promise((r, e) => {
       var img = new Image();
       img.src = url;
       img.onload = function() {
         var data = Texture.#create(this);
         var tex = new Texture();
+        tex.width = this.naturalWidth;
+        tex.height = this.naturalHeight;
         for (var i = 0; i < data.length; i += 4) {
           tex.#dataBuffer.push(new Vector4(data[i], data[i + 1], data[i + 2], data[i + 3]));
         }
         r(tex);
       };
-      img.onerror = function() { e("Texture could not be loaded"); };
+      img.onerror = () => { e("Texture could not be loaded"); };
     });
   }
 
@@ -33,6 +35,6 @@ export default class Texture {
   samplePos(p) {
     if (p.x > 1 || p.x < 0 || p.y > 1 || p.y < 0)
       return -1;
-    return this.#dataBuffer[p.x * this.width + p.y * this.height * this.width];
+    return this.#dataBuffer[p.x * (this.width - 1) + p.y * (this.height - 1) * this.width];
   }
 }
