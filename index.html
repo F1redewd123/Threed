@@ -1,0 +1,49 @@
+<script type="module">
+  import Scene from "https://f1redewd123.github.io/Threed/Scene.js";
+  import RenderBuffer from "https://f1redewd123.github.io/Threed/RenderBuffer.js?v=7";
+  import Vector2 from "https://f1redewd123.github.io/Threed/Vector2.js";
+  import Vector3 from "https://f1redewd123.github.io/Threed/Vector3.js";
+  import Shader from "https://f1redewd123.github.io/Threed/Shader.js";
+  import Texture from "https://f1redewd123.github.io/Threed/Texture.js?v=8";
+  
+  (async function() {
+    var scene = new Scene(500, 500);
+    scene.canvas.style.position = "absolute";
+    scene.canvas.style.top = "50%";
+    scene.canvas.style.left = "50%";
+    scene.canvas.style.transform = "translate(-50%, -50%)";
+    
+    var buffer = new RenderBuffer(scene);
+    
+    var tex = await Texture.fromURL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbIvVOYZA1uS7y6EfIB4n15qP7E72aj5zeWA&s");
+    
+    var verts = [
+    	new Vector3(0, 0, 1),
+      new Vector3(50, 0, 1),
+      new Vector3(50, 50, 1),
+      new Vector3(0, 50, 1)
+    ];
+    var inds = [
+    	0, 1, 2,
+      2, 3, 0
+    ];
+    var uvs = [
+    	new Vector2(0, 0),
+      new Vector2(1, 0),
+      new Vector2(1, 1),
+      new Vector2(0, 1)
+    ];
+    
+    var t = 0;
+    
+    var shader = new Shader();
+    shader.createFragmentShader(`data.fragColor = data.tex.samplePos(data.uv);`);
+    shader.createVertexShader(`data.position = data.aPos.mul(4.4).add(140);`);
+    
+    buffer.loadData(verts, inds, uvs);
+    buffer.loadShader(shader);
+    buffer.setShaderProperty("tex", tex);
+    
+    buffer.render();
+  })();
+</script>
