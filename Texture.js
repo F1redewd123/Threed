@@ -17,8 +17,8 @@ export default class Texture {
         }
         r(tex);
       };
-      img.onerror = () => { e("Texture could not be loaded"); };
-    }
+      img.onerror = function() { e("Texture could not be loaded"); };
+    });
   }
 
   static #create(img) {
