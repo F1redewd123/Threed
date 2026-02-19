@@ -44,10 +44,16 @@ export default class Texture {
       var lerp = function(a, b, t) {
         return a + (b - a) * t;
       };
-      return lerp(
-        this.#dataBuffer[Math.floor(p.x * (this.width - 1)) + Math.floor(p.y * (this.height - 1)) * this.width],
-        this.#dataBuffer[Math.ceil(p.x * (this.width - 1)) + Math.ceil(p.y * (this.height - 1)) * this.width],
-        this.#dataBuffer[p.x * (this.width - 1) + p.y * (this.height - 1) * this.width] - this.#dataBuffer[Math.floor(p.x * (this.width - 1)) + Math.floor(p.y * (this.height - 1)) * this.width]
+      
+      var f0 = this.#dataBuffer[Math.floor(p.x * (this.width - 1)) + Math.floor(p.y * (this.height - 1)) * this.width];
+      var f1 = this.#dataBuffer[Math.ceil(p.x * (this.width - 1)) + Math.ceil(p.y * (this.height - 1)) * this.width];
+      var f2 = this.#dataBuffer[p.x * (this.width - 1) + p.y * (this.height - 1) * this.width].sub(this.#dataBuffer[Math.floor(p.x * (this.width - 1)) + Math.floor(p.y * (this.height - 1)) * this.width]);
+      
+      return new Vector4(
+        lerp(f0.x, f1.x, f2.x),
+        lerp(f0.y, f1.y, f2.y),
+        lerp(f0.z, f1.z, f2.z),
+        lerp(f0.w, f1.w, f2.w)
       );
     }
   }
