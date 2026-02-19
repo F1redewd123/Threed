@@ -6,16 +6,19 @@ export default class Texture {
   #dataBuffer = [];
   
   static fromURL(url) {
-    var img = new Image();
-    img.src = url;
-    img.onload = function() {
-      var data = Texture.#create(this);
-      var tex = new Texture();
-      for (var i = 0; i < data.length; i += 4) {
-        tex.#dataBuffer.push(new Vector4(data[i], data[i + 1], data[i + 2], data[i + 3]));
-      }
-      return tex;
-    };
+    return new Promise(function(r, e) {
+      var img = new Image();
+      img.src = url;
+      img.onload = function() {
+        var data = Texture.#create(this);
+        var tex = new Texture();
+        for (var i = 0; i < data.length; i += 4) {
+          tex.#dataBuffer.push(new Vector4(data[i], data[i + 1], data[i + 2], data[i + 3]));
+        }
+        r(tex);
+      };
+      img.onerror = () => { e("Texture could not be loaded"); };
+    }
   }
 
   static #create(img) {
