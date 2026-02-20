@@ -1,0 +1,99 @@
+<script type="module">
+  import Scene from "https://f1redewd123.github.io/Threed/Scene.js";
+  import RenderBuffer from "https://f1redewd123.github.io/Threed/RenderBuffer.js?v=7";
+  import Vector2 from "https://f1redewd123.github.io/Threed/Vector2.js";
+  import Vector3 from "https://f1redewd123.github.io/Threed/Vector3.js";
+  import Shader from "https://f1redewd123.github.io/Threed/Shader.js";
+  import Texture from "https://f1redewd123.github.io/Threed/Texture.js";
+  
+  (async function() {
+    try {
+    	var scene = new Scene(500, 500);
+      var buffer = new RenderBuffer(scene);
+    
+      var tex = await Texture.fromURL("https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Flag_of_the_United_States_%28DDD-F-416E_specifications%29.svg/330px-Flag_of_the_United_States_%28DDD-F-416E_specifications%29.svg.png");
+    
+      var verts = [
+        new Vector3(0, 0, 0),
+        new Vector3(75, 0, 0),
+        new Vector3(75, 200, 0),
+        new Vector3(0, 200, 0),
+        
+        new Vector3(75, 0, 0),
+        new Vector3(150, 0, 0),
+        new Vector3(150, 200, 0),
+        new Vector3(75, 200, 0),
+        
+        new Vector3(150, 0, 0),
+        new Vector3(225, 0, 0),
+        new Vector3(225, 200, 0),
+        new Vector3(150, 200, 0),
+        
+        new Vector3(225, 0, 0),
+        new Vector3(300, 0, 0),
+        new Vector3(300, 200, 0),
+        new Vector3(225, 200, 0)
+      ];
+      var inds = [
+        0, 1, 2,
+        2, 3, 0,
+        
+        4, 5, 6,
+        6, 7, 4,
+        
+        8, 9, 10,
+        10, 11, 8,
+        
+        12, 13, 14,
+        14, 15, 12
+      ];
+      var uvs = [
+        new Vector2(0, 0),
+        new Vector2(0.25, 0),
+        new Vector2(0.25, 1),
+        new Vector2(0, 1),
+        
+        new Vector2(0.25, 0),
+        new Vector2(0.5, 0),
+        new Vector2(0.5, 1),
+        new Vector2(0.25, 1),
+        
+        new Vector2(0.5, 0),
+        new Vector2(0.75, 0),
+        new Vector2(0.75, 1),
+        new Vector2(0.5, 1),
+        
+        new Vector2(0.75, 0),
+        new Vector2(1, 0),
+        new Vector2(1, 1),
+        new Vector2(0.75, 1)
+      ];
+    
+      var t = 0;
+    
+      var shader = new Shader();
+      shader.createFragmentShader(`data.fragColor = data.tex.samplePos(data.uv);`);
+      shader.createVertexShader(`if (data.aPos.x != 0) {
+        data.position = data.aPos.add(new Vector3(100, 150 + Math.sin((data.time + data.aPos.x) * 10) * 10, 0));
+      } else {
+        data.position = data.aPos.add(new Vector3(100, 150));
+      }`);
+    
+      buffer.loadData(verts, inds, uvs);
+      buffer.loadShader(shader);
+      
+      buffer.setShaderProperty("tex", tex);
+      
+      setInterval(function() {
+        scene.ctx.clearRect(0, 0, 500, 500);
+        
+        buffer.setShaderProperty("time", t);
+        buffer.render();
+        
+        t++;
+      }, 10);
+    } catch(e) {
+    	alert(e);
+    }
+  })();
+</script>
